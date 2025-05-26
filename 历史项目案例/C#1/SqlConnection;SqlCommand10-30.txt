@@ -1,0 +1,73 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace WindowsFormsApp3
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //String sqlConStr = "Server=.;user=sa;pwd=123456;database=school";
+            //SqlConnection mySqlCon = new SqlConnection(sqlConStr);
+            //Windows身份验证方式
+            //mySqlCon.ConnectionString = "Server=.;integrated security=SSPI;Initial Catalog=school";
+
+            //Sql验证方式登录
+            //mySqlCon.ConnectionString = "Server=.;user=sa;pwd=123456;database=school";
+
+            //mySqlCon.Open();//通过开启Open()方法建立连接
+            //mySqlCon.Close();通过Close()方法关闭连接
+
+            String sqlConStr = "Server=.;user=sa;pwd=123456;database=school";
+            SqlConnection mySqlCon = new SqlConnection(sqlConStr);
+            /*using (mySqlCon) 
+            {
+                MessageBox.Show("连接成功");
+            }*/
+            //try代码运行正常执行的代码块
+            try
+            {
+                mySqlCon.Open();
+                MessageBox.Show("连接成功");
+
+                String insertStr = "Insert Student(name,sex,age,classes) values('张三','男',18,'22物联网1班')";
+                
+                SqlCommand myCmd = new SqlCommand(insertStr, mySqlCon);//SqlCommand对象，用于执行sql语句
+
+                //myCmd.Connection = mySqlCon;//Connection属性：用于设置执行Sql连接是哪一个
+                //CommandText属性：执行的SQL语句具体是什么
+                //myCmd.CommandText = "Insert Student(name,sex,age,classes) values('张三','男',18,'22物联网1班')";
+                myCmd.CommandTimeout = 5;//CommandTimeout属性：用于设置响应时间               
+                myCmd.ExecuteNonQuery();//ExecuteNonQuery()方法执行增删改
+                MessageBox.Show("执行成功");
+            }
+            catch (Exception e1) 
+            {
+                MessageBox.Show(e1.Message.ToString());
+            }
+            //catch代码运行异常执行的代码块
+            /*catch(Exception e1){
+                MessageBox.Show(e1.Message.ToString());
+            }*/
+            //finally无论如何都会执行的代码块
+            finally
+            {
+                mySqlCon.Close();
+            }
+        }
+    }
+}

@@ -1,0 +1,111 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace WindowsFormsApp3
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            SqlConnection sqlConnection = new SqlConnection();
+            sqlConnection.ConnectionString = "Server=.;user=sa;pwd=123456;database=school";
+            SqlDataReader sqlDataReader;
+            String insertSql1 = "insert student(name,sex,age,classes) " +
+                    "values('李四','男',18,'22物联网2班')";
+            String insertSql2 = "insert student(name,sex,age,classes) " +
+                   "values('王舞','女',17,'22物联网1班')";
+            String insertSql3 = "insert student(name,sex,age,classes) " +
+                   "values('陈六','男',20,'21物联网1班')";
+            String insertSql4 = "insert student(name,sex,age,classes) " +
+                  "values('李七','男',19,'20物联网2班')";
+            String updateSql = "update student set classes='22级物联网1班' where name='李四'";
+            String deleteSql = "delete from student where age<18";
+            String selectSqlScalar = "select name from student where age=18";
+            String selectSql = "select * from student";
+            String[] insertSqls = { insertSql1, insertSql2 , insertSql3 , insertSql4 };
+            try
+            {
+                sqlConnection.Open();
+                //MessageBox.Show("连接成功");
+                SqlCommand sqlCommand = new SqlCommand();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = selectSql;
+
+                sqlDataReader = sqlCommand.ExecuteReader();
+                //HasRows属性用于判断SqlDataReader对象中是否有数据
+                if (sqlDataReader.HasRows)
+                {
+                    //FieldCount属性用于获取当前查询的结果字段有几个
+                    //MessageBox.Show(sqlDataReader.FieldCount.ToString());
+                    //MessageBox.Show(sqlDataReader.IsClosed.ToString());
+
+                    //GetDataTypeName(index)方法用于查看指定字段的数据类型
+                    //MessageBox.Show(sqlDataReader.GetDataTypeName(1));
+                    //GetName(index)方法通过指定下标来查询该列的字段名称是什么
+                    //MessageBox.Show(sqlDataReader.GetName(5));
+                    //GetOrdinal("字段名称")方法通过具体的字段名称来返回对应的下标
+                    //MessageBox.Show(sqlDataReader.GetOrdinal("age").ToString());
+                    Object[] studentValues = new Object[sqlDataReader.FieldCount];
+                    String strFormater = "id,name,sex,age,classes\n";
+                    //Read()方法读取下一条数据
+                    while (sqlDataReader.Read()) 
+                    {
+                        //GetValue(index)方法取得当前行（条），指定字段的数据
+                        //MessageBox.Show(sqlDataReader.GetValue(1).ToString());
+                        sqlDataReader.GetValues(studentValues);
+                        foreach (Object obj in studentValues) 
+                        {
+                            strFormater += obj.ToString().Trim() + ",";
+                        }
+                        strFormater += "\n";
+                    }
+                    MessageBox.Show(strFormater);
+                }
+                else 
+                {
+                    MessageBox.Show("查询的结果没有数据") ;
+                }
+                //IsClosed属性用于判断sqlDataReader是否连接关闭
+                //在程序的最后，记得关闭sqlDataReader对象的连接
+                if (sqlDataReader.IsClosed == false) 
+                {
+                    sqlDataReader.Close();
+                }
+                //ExecuteScalar()仅限于查询结果只有一个值的时候
+                /*object v = sqlCommand.ExecuteScalar();
+                MessageBox.Show(v.ToString());*/
+
+
+                //sqlCommand.ExecuteNonQuery();
+                /*foreach (String insertSqltest in insertSqls) 
+                {
+                    sqlCommand.CommandText = insertSqltest;
+                    sqlCommand.ExecuteNonQuery();
+                }*/
+                //MessageBox.Show("执行成功");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString()) ;
+            }
+            finally 
+            {
+                sqlConnection.Close();
+            }
+        }
+    }
+}

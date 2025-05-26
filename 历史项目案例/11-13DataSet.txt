@@ -1,0 +1,97 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace ConsoleApp1
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {           
+            //创建数据集对象；对应关系--数据库
+             DataSet dataSetSchool = new DataSet("dataSetSchool");
+             //创建数据表对象;对应关系--表
+             DataTable dataTableStudent01 = new DataTable("dataTableStudent01");
+             //创建列对象；对应关系--字段
+             DataColumn studentColnumId = new DataColumn("id",Type.GetType("System.Int32"));
+             DataColumn studentColnumName = new DataColumn("name", Type.GetType("System.String"));
+             DataColumn studentColnumSex = new DataColumn("sex", Type.GetType("System.String"));
+             DataColumn studentColnumAge = new DataColumn("age", Type.GetType("System.Int32"));
+             DataColumn studentColnumClasses = new DataColumn("classes", Type.GetType("System.String"));
+             //为表添加列对象；对应关系--添加字段
+             dataTableStudent01.Columns.Add(studentColnumId);
+             dataTableStudent01.Columns.Add(studentColnumName);
+             dataTableStudent01.Columns.Add(studentColnumSex);
+             dataTableStudent01.Columns.Add(studentColnumAge);
+             dataTableStudent01.Columns.Add(studentColnumClasses);
+             //预设要插入的数据
+             object[,] studentRows = { {"张三","男",17,"22级物联网1班" },
+                 { "李四", "男", 18, "22级物联网1班" }
+                 ,{ "王舞","女",19,"22级物联网1班"}};
+             //遍历数据们，然后插入数据
+             for (int i = 0; i <studentRows.Length / 4; i++) 
+             {
+                 //创建行对象；对应关系--某一条数据
+                 DataRow studentRow = dataTableStudent01.NewRow();
+                 studentRow[0] = i+1;//id
+                 studentRow["name"] = studentRows[i, 0];//name
+                 studentRow[2] = studentRows[i, 1];//sex
+                 studentRow["age"] = studentRows[i, 2];//age
+                 studentRow[4] = studentRows[i, 3];//classes
+                 dataTableStudent01.Rows.Add(studentRow);
+             }
+             //将数据表对象放入数据集对象中；对应关系--数据库中插入数据表
+             dataSetSchool.Tables.Add(dataTableStudent01);
+             //最后通过AcceptChanges()方法提交事务
+             dataSetSchool.AcceptChanges();
+
+             //调用编写好的查看数据方法
+             //outTableValues(dataSetSchool);
+
+            SqlConnection sqlConnection = new SqlConnection();
+            sqlConnection.ConnectionString = "Server=.;user=sa;pwd=123456;database=school";
+
+            try 
+            {
+                sqlConnection.Open();
+                String selectSql1 = "select * from student";
+                SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(selectSql1, sqlConnection);
+                //SqlDataAdapter对象调用Fill（）方法将查询的结果放入本地数据集里面（dataSet）
+                sqlDataAdapter.Fill(dataSetSchool, "student");
+                //调用编写好的查看数据方法
+                outTableValues(dataSetSchool);
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message.ToString());
+            }
+            finally 
+            {
+                sqlConnection.Close();
+            }
+
+
+            Console.ReadKey();
+        }
+        //编写一个查看数据表的方法
+        public static void outTableValues(DataSet dataSet) 
+        {
+            foreach (DataTable dataTable in dataSet.Tables) //遍历数据集中有多少数据表
+            {
+                Console.WriteLine("表名称："+ dataTable.TableName);
+                foreach (DataRow dataRow in dataTable.Rows) //遍历当前表中有几条数据
+                {                    
+                    foreach (DataColumn dataColumn in dataTable.Columns) //遍历当前表中到底有哪些字段
+                    {
+                        Console.Write(dataRow[dataColumn]+"\t");
+                    }
+                    Console.WriteLine();
+                }
+            }
+        }
+    }
+}
